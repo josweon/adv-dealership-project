@@ -1,5 +1,6 @@
 package com.pluralsight;
 
+import javax.swing.plaf.synth.SynthOptionPaneUI;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -36,17 +37,17 @@ public class UserInterface {
             System.out.print(menu);
             option = scanner.nextLine().trim();
 
-            switch(option) {
-                case "1"-> processGetByPriceRequest();
-                case "2"-> processGetByMakeModelRequest();
-                case "3"-> System.out.print("processGetByYearRequest()");
-                case "4"-> System.out.print("processGetByColorRequest()");
-                case "5"-> System.out.print("processGetByMileageRequest()");
-                case "6"-> System.out.print("processGetByVehicleTypeRequest()");
-                case "7"-> processGetAllVehiclesRequest();
-                case "8"-> System.out.print("processAddVehicleRequest()");
-                case "9"-> System.out.print("processRemoveVehicleRequest()");
-                case "99"-> {
+            switch (option) {
+                case "1" -> processGetByPriceRequest();
+                case "2" -> processGetByMakeModelRequest();
+                case "3" -> processGetByYearRequest();
+                case "4" -> processGetByColorRequest();
+                case "5" -> processGetByMileageRequest();
+                case "6" -> System.out.print("processGetByVehicleTypeRequest()");
+                case "7" -> processGetAllVehiclesRequest();
+                case "8" -> System.out.print("processAddVehicleRequest()");
+                case "9" -> System.out.print("processRemoveVehicleRequest()");
+                case "99" -> {
                     System.out.println("\nBye Bye :)");
                     exit = true;
                 }
@@ -59,7 +60,6 @@ public class UserInterface {
     //done: change to private
     private void displayVehicles(ArrayList<Vehicle> vehicles) {
         //done: create a loop and display the vehicles;
-        System.out.print("\n");
         String closeTable = "-".repeat(94);
 
         String rowFormatHeading = "| %-5s | %-4s | %-10s | %-14s | %-10s | %-7s | %-8s | %-10s | %n";
@@ -96,6 +96,7 @@ public class UserInterface {
         boolean valid = false;
         do {
             try {
+                //todo: defend against negative numbers.
                 System.out.print("\tMin price: $");
                 min = new BigDecimal(scanner.nextLine());
 
@@ -107,19 +108,20 @@ public class UserInterface {
             } catch (NumberFormatException nfe) {
                 System.out.println("\tNot a valid number: " + nfe.getMessage());
             }
-        } while(!valid);
+        } while (!valid);
 
-        if(this.dealership.getVehiclesByPrice(min, max).isEmpty()){
+        if (this.dealership.getVehiclesByPrice(min, max).isEmpty()) {
             System.out.println("\n\t=* no vehicles found *=\n");
         } else {
+            System.out.println("\nprice.");
             displayVehicles(this.dealership.getVehiclesByPrice(min, max));
         }
     }
 
     public void processGetByMakeModelRequest() {
         System.out.println("\t[SEARCH] - Make & Model");
-        String make = null;
-        String model = null;
+        String make;
+        String model;
 
         boolean notValid;
         do {
@@ -136,12 +138,84 @@ public class UserInterface {
                 System.out.println("\tInput cannot be empty\n");
             }
 
-        } while(notValid);
+        } while (notValid);
 
-        if(this.dealership.getVehiclesByMakeModel(make,model).isEmpty()){
+        if (this.dealership.getVehiclesByMakeModel(make, model).isEmpty()) {
             System.out.println("\n\t=* no vehicles found *=\n");
         } else {
+            System.out.println("\nmake and model.");
             displayVehicles(this.dealership.getVehiclesByMakeModel(make, model));
+        }
+    }
+
+    public void processGetByYearRequest() {
+        System.out.println("\t[SEARCH] - Year");
+        int min;
+        int max;
+
+        System.out.print("\tENTER Earliest year: ");
+        min = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.print("\tENTER Latest year: ");
+        max = Integer.parseInt(scanner.nextLine().trim());
+
+
+        if (this.dealership.getVehiclesByYear(min, max).isEmpty()) {
+            System.out.println("\n\t=* no vehicles found *=\n");
+        } else {
+            System.out.println("\nyear.");
+            displayVehicles(this.dealership.getVehiclesByYear(min, max));
+        }
+    }
+
+    public void processGetByColorRequest() {
+        System.out.println("[SEARCH] - Color");
+
+        String color;
+        boolean valid = false;
+
+        do {
+            System.out.print("\tEnter color: ");
+            color = scanner.nextLine().trim().toLowerCase();
+            valid = (color.isBlank()) ? false : true;
+
+        } while (!valid);
+
+        if (this.dealership.getVehiclesByColor(color).isEmpty()) {
+            System.out.println("\n\t=* no vehicles found *=\n");
+        } else {
+            System.out.println("\ncolor.");
+            displayVehicles(this.dealership.getVehiclesByColor(color));
+        }
+    }
+
+    public void processGetByMileageRequest() {
+        System.out.println("\t[SEARCH] - Mileage");
+        int min = 0;
+        int max = 0;
+
+        boolean valid = false;
+        do {
+            try {
+                //todo: defend against negative numbers.
+                System.out.print("\tENTER min: ");
+                min = Integer.parseInt(scanner.nextLine().trim());
+
+                System.out.print("\tENTER max: ");
+                max = Integer.parseInt(scanner.nextLine().trim());
+
+                valid = true;
+
+            } catch (NumberFormatException nfe) {
+                System.out.println("\tNot a valid number: " + nfe.getMessage());
+            }
+        } while (!valid);
+
+        if (this.dealership.getVehiclesByMileage(min, max).isEmpty()) {
+            System.out.println("\n\t=* no vehicles found *=\n");
+        } else {
+            System.out.println("\nmileage.");
+            displayVehicles(this.dealership.getVehiclesByMileage(min, max));
         }
     }
 }
