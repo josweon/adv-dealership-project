@@ -43,7 +43,7 @@ public class UserInterface {
                 case "3" -> processGetByYearRequest();
                 case "4" -> processGetByColorRequest();
                 case "5" -> processGetByMileageRequest();
-                case "6" -> System.out.print("processGetByVehicleTypeRequest()");
+                case "6" -> processGetByVehicleTypeRequest();
                 case "7" -> processGetAllVehiclesRequest();
                 case "8" -> System.out.print("processAddVehicleRequest()");
                 case "9" -> System.out.print("processRemoveVehicleRequest()");
@@ -97,10 +97,10 @@ public class UserInterface {
         do {
             try {
                 //todo: defend against negative numbers.
-                System.out.print("\tMin price: $");
+                System.out.print("\tENTER Min price: $");
                 min = new BigDecimal(scanner.nextLine());
 
-                System.out.print("\tMax price: $");
+                System.out.print("\tENTER Max price: $");
                 max = new BigDecimal(scanner.nextLine());
 
                 valid = true;
@@ -126,10 +126,10 @@ public class UserInterface {
         boolean notValid;
         do {
 
-            System.out.print("\tMake: ");
+            System.out.print("\tENTER Make: ");
             make = scanner.nextLine();
 
-            System.out.print("\tModel: ");
+            System.out.print("\tENTER Model: ");
             model = scanner.nextLine();
 
             //done: find a better way to implement
@@ -150,15 +150,24 @@ public class UserInterface {
 
     public void processGetByYearRequest() {
         System.out.println("\t[SEARCH] - Year");
-        int min;
-        int max;
+        int min = 0;
+        int max = 0;
 
-        System.out.print("\tENTER Earliest year: ");
-        min = Integer.parseInt(scanner.nextLine().trim());
+        boolean valid = false;
+        do {
+            try {
+                System.out.print("\tENTER Earliest year: ");
+                min = Integer.parseInt(scanner.nextLine().trim());
 
-        System.out.print("\tENTER Latest year: ");
-        max = Integer.parseInt(scanner.nextLine().trim());
+                System.out.print("\tENTER Latest year: ");
+                max = Integer.parseInt(scanner.nextLine().trim());
 
+                valid = true;
+
+            } catch (NumberFormatException nfe) {
+                System.out.println("\tNot a valid year: " + nfe.getMessage());
+            }
+        } while (!valid);
 
         if (this.dealership.getVehiclesByYear(min, max).isEmpty()) {
             System.out.println("\n\t=* no vehicles found *=\n");
@@ -175,7 +184,7 @@ public class UserInterface {
         boolean valid = false;
 
         do {
-            System.out.print("\tEnter color: ");
+            System.out.print("\tENTER Color: ");
             color = scanner.nextLine().trim().toLowerCase();
             valid = (color.isBlank()) ? false : true;
 
@@ -198,10 +207,10 @@ public class UserInterface {
         do {
             try {
                 //todo: defend against negative numbers.
-                System.out.print("\tENTER min: ");
+                System.out.print("\tENTER Min: ");
                 min = Integer.parseInt(scanner.nextLine().trim());
 
-                System.out.print("\tENTER max: ");
+                System.out.print("\tENTER Max: ");
                 max = Integer.parseInt(scanner.nextLine().trim());
 
                 valid = true;
@@ -216,6 +225,27 @@ public class UserInterface {
         } else {
             System.out.println("\nmileage.");
             displayVehicles(this.dealership.getVehiclesByMileage(min, max));
+        }
+    }
+
+    public void processGetByVehicleTypeRequest() {
+        System.out.println("[SEARCH] - Vehicle type");
+
+        String vehicleType;
+        boolean valid = false;
+
+        do {
+            System.out.print("\tENTER Type: ");
+            vehicleType = scanner.nextLine().trim().toLowerCase();
+            valid = (vehicleType.isBlank()) ? false : true;
+
+        } while (!valid);
+
+        if (this.dealership.getVehiclesByType(vehicleType).isEmpty()) {
+            System.out.println("\n\t=* no vehicles found *=\n");
+        } else {
+            System.out.println("\nvehicle type.");
+            displayVehicles(this.dealership.getVehiclesByType(vehicleType));
         }
     }
 }
