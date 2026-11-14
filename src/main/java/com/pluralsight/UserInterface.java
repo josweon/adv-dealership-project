@@ -45,7 +45,7 @@ public class UserInterface {
                 case "5" -> processGetByMileageRequest();
                 case "6" -> processGetByVehicleTypeRequest();
                 case "7" -> processGetAllVehiclesRequest();
-                case "8" -> System.out.print("processAddVehicleRequest()");
+                case "8" -> processAddVehicleRequest();
                 case "9" -> System.out.print("processRemoveVehicleRequest()");
                 case "99" -> {
                     System.out.println("\nBye Bye :)");
@@ -247,5 +247,103 @@ public class UserInterface {
             System.out.println("\nvehicle type.");
             displayVehicles(this.dealership.getVehiclesByType(vehicleType));
         }
+    }
+
+    // use the DealershipFileManager to save the dealership each time the user adds or removes a
+    // vehicle!
+    public void processAddVehicleRequest() {
+        System.out.println("\t[UPDATE] - Add Vehicle");
+
+        int vin, year, odometer;
+        String make, model, vehicleType, color;
+        BigDecimal price;
+
+        //done: validate promptString, promptInt, promptBigD
+        vin = promptInt("vin");
+        year = promptInt("Year");
+        make = promptString("Make");
+        model = promptString("Model");
+        vehicleType = promptString("Vehicle type");
+        color = promptString("Color");
+        odometer = promptInt("Odometer");
+        price = promptBigD("Price");
+
+        Vehicle newV = new Vehicle(vin, year, make, model, vehicleType, color , odometer, price);
+        this.dealership.addVehicle(newV);
+        DealershipFileManager.saveDealership(this.dealership);
+    }
+
+    private int promptInt(String vehicleField) {
+        int number = 0;
+        boolean valid = false;
+        do {
+            try {
+                System.out.printf("\tENTER %s: ", vehicleField);
+                number = Integer.parseInt(scanner.nextLine().trim());
+
+                if (number <= 0) {
+                    System.out.println("\tInvalid number: Cannot be negative");
+                } else {
+                    valid = true;
+                }
+
+            } catch (NumberFormatException nfe) {
+                System.out.println("\tInvalid number: " + nfe.getMessage());
+            }
+        } while (!valid);
+
+        return number;
+    }
+
+    private String promptString(String vehicleField) {
+        String query;
+        String[] vehicleTypes = {"car", "truck", "SUV", "van"};
+        boolean valid = false;
+
+        do {
+            System.out.printf("\tENTER %s: ", vehicleField);
+            query = scanner.nextLine().trim();
+
+            //todo: fix
+            if (vehicleField.equals("Vehicle type")) {
+                for (String type : vehicleTypes) {
+                    if (type.contains(query)) {
+                        query = type;
+                    } else {
+                        query = "";
+                    }
+                }
+            }
+
+            if (!query.isBlank()) {
+                valid = true;
+            } else {
+                System.out.println("\tInvalid input: Cannot be empty");
+            }
+        } while (!valid);
+
+        return query;
+    }
+
+    private BigDecimal promptBigD(String vehicleField) {
+        BigDecimal price = BigDecimal.ZERO;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.printf("\tENTER %s: $", vehicleField);
+                price = new BigDecimal(scanner.nextLine().trim());
+
+                if (price.signum() <= 0) {
+                    System.out.println("\tInvalid number: Cannot be <= 0");
+                } else {
+                    valid = true;
+                }
+            } catch (NumberFormatException nfe) {
+                System.out.println("\tInvalid number: " + nfe.getMessage());
+            }
+        } while (!valid);
+
+        return price;
     }
 }
