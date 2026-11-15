@@ -49,7 +49,7 @@ public class DealershipFileManager {
         try {
             BufferedWriter bufWriter = new BufferedWriter(new FileWriter(filePath));
 
-            String header = String.format("%s|%s|%s",
+            String header = String.format("%s|%s|%s%n",
                     dealership.getName(),
                     dealership.getAddress(),
                     dealership.getPhone());
@@ -58,7 +58,7 @@ public class DealershipFileManager {
 
             for (int i = 0; i < saveInventory.size(); i++) {
                 Vehicle v = saveInventory.get(i);
-                String vehicle = String.format("%s|%s|%s|%s|%s|%s|%s|%s",
+                String vehicle = String.format("%s|%s|%s|%s|%s|%s|%s|%s%n",
                         v.getVin(),
                         v.getYear(),
                         v.getMake(),
@@ -69,12 +69,11 @@ public class DealershipFileManager {
                         v.getPrice());
                 bufWriter.write(vehicle);
             }
-            bufWriter.newLine();
             bufWriter.close();
 
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }
-        System.out.println("\tSuccess!");
+        System.out.println("\t=* Saved! *=");
     }
 }

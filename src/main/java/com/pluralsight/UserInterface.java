@@ -46,7 +46,7 @@ public class UserInterface {
                 case "6" -> processGetByVehicleTypeRequest();
                 case "7" -> processGetAllVehiclesRequest();
                 case "8" -> processAddVehicleRequest();
-                case "9" -> System.out.print("processRemoveVehicleRequest()");
+                case "9" -> processRemoveVehicleRequest();
                 case "99" -> {
                     System.out.println("\nBye Bye :)");
                     exit = true;
@@ -249,8 +249,6 @@ public class UserInterface {
         }
     }
 
-    // use the DealershipFileManager to save the dealership each time the user adds or removes a
-    // vehicle!
     public void processAddVehicleRequest() {
         System.out.println("\t[UPDATE] - Add Vehicle");
 
@@ -258,8 +256,10 @@ public class UserInterface {
         String make, model, vehicleType, color;
         BigDecimal price;
 
-        //done: validate promptString, promptInt, promptBigD
-        vin = promptInt("vin");
+        int size = this.dealership.getAllVehicles().size();
+        Vehicle lastV = this.dealership.getAllVehicles().get(size - 1);
+
+        vin = lastV.getVin() + 1;
         year = promptInt("Year");
         make = promptString("Make");
         model = promptString("Model");
@@ -268,11 +268,45 @@ public class UserInterface {
         odometer = promptInt("Odometer");
         price = promptBigD("Price");
 
-        Vehicle newV = new Vehicle(vin, year, make, model, vehicleType, color , odometer, price);
+        Vehicle newV = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
         this.dealership.addVehicle(newV);
         DealershipFileManager.saveDealership(this.dealership);
     }
 
+    public void processRemoveVehicleRequest() {
+        System.out.println("\t[UPDATE] - Remove Vehicle");
+
+        int vin;
+
+        displayVehicles(this.dealership.getAllVehicles());
+        vin = promptInt("vin");
+
+        boolean success = false;
+        for (Vehicle v : this.dealership.getAllVehicles()) {
+            if (v.getVin() == vin) {
+                System.out.printf("\tAre you sure you'd like to remove this %s %s %s(y/n)?",
+                        v.getYear(),
+                        v.getMake(),
+                        v.getModel());
+
+                String input = scanner.nextLine().trim();
+                if (input.equalsIgnoreCase("y")) {
+                    this.dealership.removeVehicle(v);
+                    success = true;
+                    DealershipFileManager.saveDealership(this.dealership);
+                    break;
+                } else {
+                    System.out.println("\t=* Not removed *=");
+                }
+            }
+        }
+
+        if (!success) {
+            System.out.println("\t=* Vehicle doesn't exist *=");
+        }
+    }
+
+    //region Scanner helpers
     private int promptInt(String vehicleField) {
         int number = 0;
         boolean valid = false;
@@ -318,7 +352,7 @@ public class UserInterface {
             if (!query.isBlank()) {
                 valid = true;
             } else {
-                System.out.println("\tInvalid input: Cannot be empty");
+                System.out.println("\tInvalid input: Not a Vehicle type");
             }
         } while (!valid);
 
@@ -346,4 +380,5 @@ public class UserInterface {
 
         return price;
     }
+    //endregion
 }
