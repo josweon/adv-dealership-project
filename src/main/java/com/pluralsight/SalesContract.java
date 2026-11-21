@@ -8,8 +8,6 @@ public class SalesContract extends Contract{
     final private BigDecimal recordingFee = new BigDecimal("100");
     private BigDecimal processingFee;
     private Boolean toFinance = false;
-    private BigDecimal monthlyPayment;
-    private BigDecimal totalPrice;
 
     public SalesContract(){
         super();
@@ -44,9 +42,9 @@ public class SalesContract extends Contract{
         BigDecimal vehicleSalesTax = vehiclePrice.multiply(this.salesTaxAmount);
         BigDecimal salesTax = vehiclePrice.add(vehicleSalesTax);
 
-        BigDecimal totalPriceWithFees = salesTax.add(this.processingFee).add(this.recordingFee);
+        BigDecimal totalPrice = salesTax.add(this.processingFee).add(this.recordingFee);
 
-        return totalPriceWithFees;
+        return totalPrice;
     }
 
     @Override
@@ -70,6 +68,7 @@ public class SalesContract extends Contract{
                 BigDecimal finalPrice = this.getTotalPrice().multiply(interestRate);
                 monthlyPayment = finalPrice.divide(duration, RoundingMode.HALF_UP);
             }
+
             return monthlyPayment;
         }
     }
