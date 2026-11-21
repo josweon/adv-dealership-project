@@ -1,4 +1,4 @@
-package com.pluralsight;
+package com.dealership;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +18,11 @@ class SalesContractTest {
         assertEquals(expected, actual);
     }
 
+    // SALE:
+    // SALES_TAX|RECORDING_FEE|PROCESSING_FEE|TOTAL_PRICE|FINANCE_OPTION|MONTHLY_PAYMENT
+    // SALE|20210928|Dana Wyatt|dana@texas.com|10112|1993|
+    // Ford|Explorer|SUV|Red|525123|995.00|
+    // 49.75|100.00|295.00|1439.75|NO|0.00
     @Test
     void test_getTotalPrice() {
         Vehicle testV = new Vehicle(12345, 2022,"Ford", "Grand Master", "van", "black", 223532, BigDecimal.valueOf(20_000.00));

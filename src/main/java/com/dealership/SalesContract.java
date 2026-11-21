@@ -1,4 +1,4 @@
-package com.pluralsight;
+package com.dealership;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,7 +19,7 @@ public class SalesContract extends Contract{
         BigDecimal underPrice = BigDecimal.valueOf(10_000);
         BigDecimal vehiclePrice = vehicleSold.getPrice();
 
-        if (vehiclePrice.compareTo(underPrice) <= 0) {
+        if (vehiclePrice.compareTo(underPrice) < 0) {
             this.processingFee = new BigDecimal("295");
         } else {
             this.processingFee = new BigDecimal("495");
@@ -30,6 +30,18 @@ public class SalesContract extends Contract{
 
     public Boolean getToFinance() {
         return toFinance;
+    }
+
+    public BigDecimal getRecordingFee() {
+        return recordingFee;
+    }
+
+    public BigDecimal getProcessingFee() {
+        return processingFee;
+    }
+
+    public BigDecimal getSalesTaxAmount() {
+        return this.salesTaxAmount.multiply(getVehicleSold().getPrice());
     }
 
     public void setToFinance(Boolean toFinance) {
@@ -49,27 +61,40 @@ public class SalesContract extends Contract{
 
     @Override
     public BigDecimal getMonthlyPayment() {
+        // P * r / (1 - (1 + r)^-n)
         if (!this.toFinance) {
             return BigDecimal.ZERO;
         } else {
+
             BigDecimal vehiclePrice = getVehicleSold().getPrice();
+            BigDecimal totalPrice = this.getTotalPrice();
             BigDecimal priceBoundary = BigDecimal.valueOf(10_000);
 
             BigDecimal monthlyPayment = BigDecimal.ZERO;
             if (vehiclePrice.compareTo(priceBoundary) >= 0) {
-                BigDecimal interestRate = new BigDecimal("1.0425");
-                BigDecimal duration = BigDecimal.valueOf(48);
-                BigDecimal finalPrice = this.getTotalPrice().multiply(interestRate);
-                monthlyPayment = finalPrice.divide(duration, RoundingMode.HALF_UP);
+                BigDecimal rate = new BigDecimal("0.0425");
+                monthlyPayment = this.interestCalculation(totalPrice, rate, 48);
 
             } else {
-                BigDecimal interestRate = new BigDecimal("1.0525");
-                BigDecimal duration = BigDecimal.valueOf(24);
-                BigDecimal finalPrice = this.getTotalPrice().multiply(interestRate);
-                monthlyPayment = finalPrice.divide(duration, RoundingMode.HALF_UP);
+                BigDecimal rate = new BigDecimal("0.0525");
+                monthlyPayment = this.interestCalculation(totalPrice, rate, 24);
             }
 
             return monthlyPayment;
         }
+    }
+
+    private BigDecimal interestCalculation(BigDecimal price, BigDecimal rate, int durationInMonths) {
+        // P * r / (1 - (1 + r)^-n)
+        // P * r
+         BigDecimal numerator = price.multiply(rate);
+
+         // (1 - (1 + r)^-n)
+         BigDecimal powerCalculation = BigDecimal.ONE.add(rate).pow(durationInMonths);
+         BigDecimal denominator = BigDecimal.ONE.subtract(BigDecimal.ONE.divide(powerCalculation, RoundingMode.HALF_UP));
+
+         BigDecimal result = numerator.divide(denominator, RoundingMode.HALF_UP);
+
+         return result.setScale(2, RoundingMode.HALF_UP);
     }
 }

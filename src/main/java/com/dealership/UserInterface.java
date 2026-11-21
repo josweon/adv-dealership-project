@@ -1,6 +1,5 @@
-package com.pluralsight;
+package com.dealership;
 
-import javax.swing.plaf.synth.SynthOptionPaneUI;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Scanner;
