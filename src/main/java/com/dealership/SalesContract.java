@@ -56,7 +56,7 @@ public class SalesContract extends Contract{
 
         BigDecimal totalPrice = salesTax.add(this.processingFee).add(this.recordingFee);
 
-        return totalPrice;
+        return totalPrice.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -87,13 +87,15 @@ public class SalesContract extends Contract{
     private BigDecimal interestCalculation(BigDecimal price, BigDecimal rate, int durationInMonths) {
         // P * r / (1 - (1 + r)^-n)
         // P * r
-         BigDecimal numerator = price.multiply(rate);
+        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12),10, RoundingMode.HALF_UP);
 
-         // (1 - (1 + r)^-n)
-         BigDecimal powerCalculation = BigDecimal.ONE.add(rate).pow(durationInMonths);
-         BigDecimal denominator = BigDecimal.ONE.subtract(BigDecimal.ONE.divide(powerCalculation, RoundingMode.HALF_UP));
+        BigDecimal numerator = price.multiply(monthlyRate);
 
-         BigDecimal result = numerator.divide(denominator, RoundingMode.HALF_UP);
+        // (1 - (1 + r)^-n)
+        BigDecimal growth = BigDecimal.ONE.add(monthlyRate).pow(durationInMonths);
+        BigDecimal denominator = BigDecimal.ONE.subtract(BigDecimal.ONE.divide(growth, 10, RoundingMode.HALF_UP));
+
+        BigDecimal result = numerator.divide(denominator, 2, RoundingMode.HALF_UP);
 
          return result.setScale(2, RoundingMode.HALF_UP);
     }
