@@ -3,13 +3,13 @@ package com.dealership;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class SalesContract extends Contract{
+public class SalesContract extends Contract {
     final private BigDecimal salesTaxAmount = new BigDecimal("0.05");
     final private BigDecimal recordingFee = new BigDecimal("100");
     private BigDecimal processingFee;
     private Boolean toFinance = false;
 
-    public SalesContract(){
+    public SalesContract() {
         super();
     }
 
@@ -41,7 +41,7 @@ public class SalesContract extends Contract{
     }
 
     public BigDecimal getSalesTaxAmount() {
-        return this.salesTaxAmount.multiply(getVehicleSold().getPrice());
+        return this.salesTaxAmount.multiply(getVehicleSold().getPrice()).setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setToFinance(Boolean toFinance) {
@@ -63,7 +63,7 @@ public class SalesContract extends Contract{
     public BigDecimal getMonthlyPayment() {
         // P * r / (1 - (1 + r)^-n)
         if (!this.toFinance) {
-            return BigDecimal.ZERO;
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         } else {
 
             BigDecimal vehiclePrice = getVehicleSold().getPrice();
@@ -87,7 +87,7 @@ public class SalesContract extends Contract{
     private BigDecimal interestCalculation(BigDecimal price, BigDecimal rate, int durationInMonths) {
         // P * r / (1 - (1 + r)^-n)
         // P * r
-        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12),10, RoundingMode.HALF_UP);
+        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12), 10, RoundingMode.HALF_UP);
 
         BigDecimal numerator = price.multiply(monthlyRate);
 
@@ -97,6 +97,6 @@ public class SalesContract extends Contract{
 
         BigDecimal result = numerator.divide(denominator, 2, RoundingMode.HALF_UP);
 
-         return result.setScale(2, RoundingMode.HALF_UP);
+        return result.setScale(2, RoundingMode.HALF_UP);
     }
 }

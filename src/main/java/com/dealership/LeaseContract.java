@@ -13,7 +13,15 @@ public class LeaseContract extends Contract{
         this.endingValue = vehicleSold.getPrice().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
 
         BigDecimal leaseFeePercentage = new BigDecimal("0.07");
-        this.leaseFee = vehicleSold.getPrice().multiply(leaseFeePercentage);
+        this.leaseFee = vehicleSold.getPrice().multiply(leaseFeePercentage).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public BigDecimal getEndingValue() {
+        return endingValue;
+    }
+
+    public BigDecimal getLeaseFee() {
+        return leaseFee;
     }
 
     @Override

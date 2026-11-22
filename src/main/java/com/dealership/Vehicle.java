@@ -1,6 +1,7 @@
 package com.dealership;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Vehicle {
     private int vin;
@@ -85,7 +86,7 @@ public class Vehicle {
     }
 
     public BigDecimal getPrice() {
-        return price;
+        return price.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setPrice(BigDecimal price) {
