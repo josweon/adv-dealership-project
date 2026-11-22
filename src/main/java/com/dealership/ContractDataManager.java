@@ -1,9 +1,14 @@
 package com.dealership;
 
-public class ContractDataManager {
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
-    public static String saveContract(Contract contract){
-        String output = "";
+public class ContractDataManager {
+    final static String filePath = "src/main/resources/contracts.csv";
+
+    public static void saveContract(Contract contract){
+        String fullReceipt = "";
         String customerFields;
         String vehicleFields;
         String contractSpecificFields;
@@ -14,16 +19,24 @@ public class ContractDataManager {
         } else {
             contractType = "LEASE";
         }
-
         customerFields = customerInfo(contract);
         vehicleFields = vehicleString(contract.getVehicleSold());
         contractSpecificFields = contractSpecificInfo(contract);
-        output = String.format("%s|%s|%s|%s",
+        fullReceipt = String.format("%s|%s|%s|%s",
                 contractType,
                 customerFields,
                 vehicleFields,
                 contractSpecificFields);
-        return output;
+
+        try {
+            BufferedWriter bufwriter = new BufferedWriter(new FileWriter(filePath, true));
+            bufwriter.write(fullReceipt);
+            bufwriter.newLine();
+            bufwriter.close();
+
+        } catch (IOException ioe) {
+            System.out.println("Invalid input");
+        }
     }
 
     private static String contractSpecificInfo(Contract contract){
@@ -92,5 +105,19 @@ public class ContractDataManager {
                 vehiclePrice);
 
         return result;
+    }
+
+    public static void initializeContractCsv(){
+        try {
+            BufferedWriter bufwriter = new BufferedWriter(new FileWriter(filePath));
+            bufwriter.write("CONTRACT_TYPE|DATE|CUSTOMER_NAME|CUSTOMER_EMAIL|VIN|YEAR|MAKE|MODEL" +
+                    "|VEHICLE_TYPE|COLOR|ODOMETER|VEHICLE_PRICE|[contract-specific-fields]");
+            bufwriter.newLine();
+            bufwriter.close();
+
+        } catch (IOException ioe) {
+            System.out.println("Invalid IO Stream: " + ioe.getMessage());
+        }
+        System.out.println("File Initialized!");
     }
 }
