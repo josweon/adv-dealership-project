@@ -7,7 +7,7 @@ import java.io.IOException;
 public class ContractDataManager {
     final static String filePath = "src/main/resources/contracts.csv";
 
-    public static void saveContract(Contract contract){
+    public static void saveContract(Contract contract) {
         String fullReceipt = "";
         String customerFields;
         String vehicleFields;
@@ -39,7 +39,7 @@ public class ContractDataManager {
         }
     }
 
-    private static String contractSpecificInfo(Contract contract){
+    private static String contractSpecificInfo(Contract contract) {
         String contractSpecificInfo = "";
         if (contract instanceof SalesContract) {
             SalesContract salesContract = (SalesContract) contract;
@@ -75,7 +75,7 @@ public class ContractDataManager {
         return contractSpecificInfo;
     }
 
-    private static String customerInfo(Contract contract){
+    private static String customerInfo(Contract contract) {
         String date = contract.getDate();
         String customerName = contract.getCustomerName();
         String customerEmail = contract.getCustomerEmail();
@@ -107,7 +107,7 @@ public class ContractDataManager {
         return result;
     }
 
-    public static void initializeContractCsv(){
+    public static void initializeContractCsv() {
         try {
             BufferedWriter bufwriter = new BufferedWriter(new FileWriter(filePath));
             bufwriter.write("CONTRACT_TYPE|DATE|CUSTOMER_NAME|CUSTOMER_EMAIL|VIN|YEAR|MAKE|MODEL" +

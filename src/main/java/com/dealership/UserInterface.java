@@ -1,8 +1,13 @@
 package com.dealership;
 
 import java.math.BigDecimal;
+import java.sql.SQLOutput;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import static java.lang.System.exit;
 
 public class UserInterface {
     private Dealership dealership;
@@ -25,6 +30,7 @@ public class UserInterface {
                 [7] - List ALL vehicles\s
                 [8] - Add a vehicle\s
                 [9] - Remove a vehicle\s
+                [0] - Sell/Lease a vehicle\s
                 [99]- Quit
                 
                 ENTER option:\s""";
@@ -46,6 +52,7 @@ public class UserInterface {
                 case "7" -> processGetAllVehiclesRequest();
                 case "8" -> processAddVehicleRequest();
                 case "9" -> processRemoveVehicleRequest();
+                case "0" -> processSellLeaseVehicleRequest();
                 case "99" -> {
                     System.out.println("\nBye Bye :)");
                     exit = true;
@@ -54,6 +61,87 @@ public class UserInterface {
             }
 
         } while (!exit);
+    }
+
+    private void processSellLeaseVehicleRequest() {
+        String menu = """
+                \t=* CONTRACT *=
+                \t[1] Sell vehicle
+                \t[2] Lease vehicle
+                \t[0] <-Back
+                
+                \tENTER option:\s""";
+
+        String option;
+        boolean exit = false;
+
+        do {
+            System.out.print(menu);
+            option = scanner.nextLine();
+
+            switch (option) {
+                case "1" -> processSellVehicleRequest();
+                case "2" -> processLeaseVehicleRequest();
+                case "0" -> exit = true;
+                default -> System.out.println("\t⚠\uFE0F Not an option: Try again\n");
+            }
+
+        } while (!exit);
+
+    }
+
+    private void processLeaseVehicleRequest() {
+        System.out.println("\nlease.");
+
+        displayVehicles(this.dealership.getAllVehicles());
+        Vehicle vehicle = null;
+
+        do {
+            int vin = promptInt("vin");
+            vehicle = this.dealership.getVehiclesByVin(vin);
+
+            if (vehicle != null) {
+                System.out.printf("\t[LEASE] %s %s %s%n",
+                        vehicle.getYear(),
+                        vehicle.getMake(),
+                        vehicle.getModel());
+            }
+
+        } while (vehicle == null);
+
+        LocalDate now = LocalDate.now();
+        String customerName = promptString("name");
+        String customerEmail = promptString("email");
+
+        LeaseContract leaseContract = new LeaseContract(now.toString(), customerName, customerEmail, vehicle);
+
+        System.out.println("\n========== LEASE SUMMARY ==========");
+        System.out.printf("Date:       %s%n", leaseContract.getDate());
+        System.out.printf("Customer:   %s (%s)%n", leaseContract.getCustomerName(), leaseContract.getCustomerEmail());
+        System.out.printf("Vehicle:    %d %s %s%n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
+        System.out.printf("Price:      $%,.2f%n", vehicle.getPrice());
+
+        System.out.println("\nTerms---");
+        System.out.printf("%-18s $%,10.2f%n", "Lease Fee (7%):", leaseContract.getLeaseFee());
+        System.out.printf("%-18s $%,10.2f%n", "Monthly Payment:", leaseContract.getMonthlyPayment());
+        System.out.printf("%-18s %10s%n",     "Term:", "36 months");
+        System.out.println("-----------------------------------");
+        System.out.printf("%-18s $%,10.2f%n", "Total Price:", leaseContract.getTotalPrice());
+        System.out.println("===================================");
+
+        System.out.print("Do you accept(y/n)? ");
+        String response = scanner.nextLine();
+
+        if (response.equalsIgnoreCase("y")) {
+            ContractDataManager.saveContract(leaseContract);
+            this.dealership.removeVehicle(vehicle);
+            System.out.printf("Enjoy your %s %s!%n", vehicle.getMake(), vehicle.getModel());
+        } else {
+            System.out.println("Hope you come again!");
+        }
+    }
+
+    private void processSellVehicleRequest() {
     }
 
     //done: change to private
@@ -205,7 +293,7 @@ public class UserInterface {
         boolean valid = false;
         do {
             try {
-                //todo: defend against negative numbers.
+                //@todo: defend against negative numbers.
                 System.out.print("\tENTER Min: ");
                 min = Integer.parseInt(scanner.nextLine().trim());
 
