@@ -1,13 +1,9 @@
 package com.dealership;
 
 import java.math.BigDecimal;
-import java.sql.SQLOutput;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import static java.lang.System.exit;
 
 public class UserInterface {
     private Dealership dealership;
@@ -135,6 +131,7 @@ public class UserInterface {
         if (response.equalsIgnoreCase("y")) {
             ContractDataManager.saveContract(leaseContract);
             this.dealership.removeVehicle(vehicle);
+            DealershipFileManager.saveDealership(this.dealership);
             System.out.printf("Enjoy your %s %s!%n", vehicle.getMake(), vehicle.getModel());
         } else {
             System.out.println("Hope you come again!");
@@ -142,6 +139,63 @@ public class UserInterface {
     }
 
     private void processSellVehicleRequest() {
+        System.out.println("\nsell.");
+
+        displayVehicles(this.dealership.getAllVehicles());
+        Vehicle vehicle = null;
+
+        do {
+            int vin = promptInt("vin");
+            vehicle = this.dealership.getVehiclesByVin(vin);
+
+            if (vehicle != null) {
+                System.out.printf("\t[SALE] %s %s %s%n",
+                        vehicle.getYear(),
+                        vehicle.getMake(),
+                        vehicle.getModel());
+            }
+
+        } while (vehicle == null);
+
+        LocalDate now = LocalDate.now();
+        String customerName = promptString("name");
+        String customerEmail = promptString("email");
+
+        SalesContract salesContract = new SalesContract(now.toString(), customerName, customerEmail, vehicle);
+
+        System.out.print("\tFinance(y/n)? ");
+        String finance = scanner.nextLine().trim();
+        if (finance.equalsIgnoreCase("y"))salesContract.setToFinance(true);
+
+        System.out.println("\n========== SALE SUMMARY ==========");
+        System.out.printf("Date:       %s%n", salesContract.getDate());
+        System.out.printf("Customer:   %s (%s)%n", salesContract.getCustomerName(), salesContract.getCustomerEmail());
+        System.out.printf("Vehicle:    %d %s %s%n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
+        System.out.printf("Price:      $%,.2f%n", vehicle.getPrice());
+
+        System.out.println("\nTerms:");
+        System.out.printf("%-18s $%,10.2f%n", "Sales Tax (5%):",   salesContract.getSalesTaxAmount());
+        System.out.printf("%-18s $%,10.2f%n", "Recording Fee:",    salesContract.getRecordingFee());
+        System.out.printf("%-18s $%,10.2f%n", "Processing Fee:",   salesContract.getProcessingFee());
+        System.out.println("-----------------------------------");
+        System.out.printf("%-18s $%,10.2f%n", "Total Price:",      salesContract.getTotalPrice());
+        System.out.printf("%-18s %11s%n",     "Financing:",        salesContract.getToFinance() ? "YES" : "NO");
+        if (salesContract.getToFinance()) {
+            System.out.printf("%-18s $%,10.2f%n", "Monthly Payment:", salesContract.getMonthlyPayment());
+        }
+        System.out.println("===================================");
+
+        System.out.print("Do you accept(y/n)? ");
+        String response = scanner.nextLine();
+
+        if (response.equalsIgnoreCase("y")) {
+            ContractDataManager.saveContract(salesContract);
+            this.dealership.removeVehicle(vehicle);
+            DealershipFileManager.saveDealership(this.dealership);
+            System.out.printf("Enjoy your %s %s!%n%n", vehicle.getMake(), vehicle.getModel());
+        } else {
+            System.out.println("Hope you come again!%n");
+        }
     }
 
     //done: change to private
