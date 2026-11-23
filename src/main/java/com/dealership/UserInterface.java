@@ -1,6 +1,7 @@
 package com.dealership;
 
 import java.math.BigDecimal;
+import java.rmi.dgc.Lease;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -59,6 +60,43 @@ public class UserInterface {
         } while (!exit);
     }
 
+    public void displayContractTerms(Contract contract, Vehicle vehicle) {
+        if (contract instanceof LeaseContract leaseContract) {
+            System.out.println("\n========== LEASE SUMMARY ==========");
+            System.out.printf("Date:       %s%n", leaseContract.getDate());
+            System.out.printf("Customer:   %s (%s)%n", leaseContract.getCustomerName(), leaseContract.getCustomerEmail());
+            System.out.printf("Vehicle:    %d %s %s%n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
+            System.out.printf("Price:      $%,.2f%n", vehicle.getPrice());
+
+            System.out.println("\nTerms---");
+            System.out.printf("%-18s $%,10.2f%n", "Lease Fee (7%):", leaseContract.getLeaseFee());
+            System.out.printf("%-18s $%,10.2f%n", "Monthly Payment:", leaseContract.getMonthlyPayment());
+            System.out.printf("%-18s %10s%n",     "Term:", "36 months");
+            System.out.println("-----------------------------------");
+            System.out.printf("%-18s $%,10.2f%n", "Total Price:", leaseContract.getTotalPrice());
+            System.out.println("===================================");
+        } else {
+            SalesContract salesContract = (SalesContract) contract;
+            System.out.println("\n========== SALE SUMMARY ==========");
+            System.out.printf("Date:       %s%n", salesContract.getDate());
+            System.out.printf("Customer:   %s (%s)%n", salesContract.getCustomerName(), salesContract.getCustomerEmail());
+            System.out.printf("Vehicle:    %d %s %s%n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
+            System.out.printf("Price:      $%,.2f%n", vehicle.getPrice());
+
+            System.out.println("\nTerms:");
+            System.out.printf("%-18s $%,10.2f%n", "Sales Tax (5%):",   salesContract.getSalesTaxAmount());
+            System.out.printf("%-18s $%,10.2f%n", "Recording Fee:",    salesContract.getRecordingFee());
+            System.out.printf("%-18s $%,10.2f%n", "Processing Fee:",   salesContract.getProcessingFee());
+            System.out.println("-----------------------------------");
+            System.out.printf("%-18s $%,10.2f%n", "Total Price:",      salesContract.getTotalPrice());
+            System.out.printf("%-18s %11s%n",     "Financing:",        salesContract.getToFinance() ? "YES" : "NO");
+            if (salesContract.getToFinance()) {
+                System.out.printf("%-18s $%,10.2f%n", "Monthly Payment:", salesContract.getMonthlyPayment());
+            }
+            System.out.println("===================================");
+        }
+    }
+
     private void processSellLeaseVehicleRequest() {
         String menu = """
                 \t=* CONTRACT *=
@@ -111,20 +149,7 @@ public class UserInterface {
 
         LeaseContract leaseContract = new LeaseContract(now.toString(), customerName, customerEmail, vehicle);
 
-        System.out.println("\n========== LEASE SUMMARY ==========");
-        System.out.printf("Date:       %s%n", leaseContract.getDate());
-        System.out.printf("Customer:   %s (%s)%n", leaseContract.getCustomerName(), leaseContract.getCustomerEmail());
-        System.out.printf("Vehicle:    %d %s %s%n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
-        System.out.printf("Price:      $%,.2f%n", vehicle.getPrice());
-
-        System.out.println("\nTerms---");
-        System.out.printf("%-18s $%,10.2f%n", "Lease Fee (7%):", leaseContract.getLeaseFee());
-        System.out.printf("%-18s $%,10.2f%n", "Monthly Payment:", leaseContract.getMonthlyPayment());
-        System.out.printf("%-18s %10s%n",     "Term:", "36 months");
-        System.out.println("-----------------------------------");
-        System.out.printf("%-18s $%,10.2f%n", "Total Price:", leaseContract.getTotalPrice());
-        System.out.println("===================================");
-
+        displayContractTerms(leaseContract, vehicle);
         System.out.print("Do you accept(y/n)? ");
         String response = scanner.nextLine();
 
@@ -134,9 +159,10 @@ public class UserInterface {
             DealershipFileManager.saveDealership(this.dealership);
             System.out.printf("Enjoy your %s %s!%n", vehicle.getMake(), vehicle.getModel());
         } else {
-            System.out.println("Hope you come again!");
+            System.out.println("Hope you come again!\n");
         }
     }
+
 
     private void processSellVehicleRequest() {
         System.out.println("\nsell.");
@@ -167,24 +193,7 @@ public class UserInterface {
         String finance = scanner.nextLine().trim();
         if (finance.equalsIgnoreCase("y"))salesContract.setToFinance(true);
 
-        System.out.println("\n========== SALE SUMMARY ==========");
-        System.out.printf("Date:       %s%n", salesContract.getDate());
-        System.out.printf("Customer:   %s (%s)%n", salesContract.getCustomerName(), salesContract.getCustomerEmail());
-        System.out.printf("Vehicle:    %d %s %s%n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
-        System.out.printf("Price:      $%,.2f%n", vehicle.getPrice());
-
-        System.out.println("\nTerms:");
-        System.out.printf("%-18s $%,10.2f%n", "Sales Tax (5%):",   salesContract.getSalesTaxAmount());
-        System.out.printf("%-18s $%,10.2f%n", "Recording Fee:",    salesContract.getRecordingFee());
-        System.out.printf("%-18s $%,10.2f%n", "Processing Fee:",   salesContract.getProcessingFee());
-        System.out.println("-----------------------------------");
-        System.out.printf("%-18s $%,10.2f%n", "Total Price:",      salesContract.getTotalPrice());
-        System.out.printf("%-18s %11s%n",     "Financing:",        salesContract.getToFinance() ? "YES" : "NO");
-        if (salesContract.getToFinance()) {
-            System.out.printf("%-18s $%,10.2f%n", "Monthly Payment:", salesContract.getMonthlyPayment());
-        }
-        System.out.println("===================================");
-
+        displayContractTerms(salesContract, vehicle);
         System.out.print("Do you accept(y/n)? ");
         String response = scanner.nextLine();
 
@@ -194,7 +203,7 @@ public class UserInterface {
             DealershipFileManager.saveDealership(this.dealership);
             System.out.printf("Enjoy your %s %s!%n%n", vehicle.getMake(), vehicle.getModel());
         } else {
-            System.out.println("Hope you come again!%n");
+            System.out.println("Hope you come again!\n");
         }
     }
 
@@ -237,7 +246,7 @@ public class UserInterface {
         boolean valid = false;
         do {
             try {
-                //todo: defend against negative numbers.
+                //@todo: defend against negative numbers.
                 System.out.print("\tENTER Min price: $");
                 min = new BigDecimal(scanner.nextLine());
 
